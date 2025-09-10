@@ -14,17 +14,6 @@ This repository presents a comprehensive research pipeline for developing and va
 - Robust validation using purged time-series cross-validation
 - Comprehensive feature engineering incorporating market microstructure
 
-## 🏗️ Repository Structure
-.
-├── full_developed_strategy.ipynb   # Main notebook: data processing, feature engineering, modeling, backtest
-├── saisantosh_report.pdf           # Written project report (figures & analysis)
-├── data.csv                        # Primary hourly OHLCV dataset
-├── gold.csv                        # Daily gold close used as macro/commodity feature
-├── oil.csv                         # Daily WTI crude close & volume used as macro/commodity feature
-├── requirements.txt                # Python package requirements
-└── README.md
-
-
 ## 🔬 Research Methodology
 
 ### 1. Feature Engineering Strategy
