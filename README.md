@@ -1,155 +1,158 @@
-# Forex-Quantitative-Trading-Strategy-Development
-**A Machine Learning Approach to Low-Volatility FX Pairs**
+# Forex Quantitative Trading Strategy
 
-**Author:** Aguru Venkata Saisantosh Patnaik  
-**Contact:** [agurusantosh@gmail.com](mailto:agurusantosh@gmail.com)
+**A Machine Learning Approach to Low-Volatility FX Pairs**  
+**Author:** Aguru Venkata Saisantosh Patnaik
 
-## 🎯 Project Overview
+An end-to-end quantitative research pipeline — from raw hourly FX data to a live-ready XGBoost trading strategy. Achieves **+87% returns** with a **Sharpe ratio of 1.69** and **maximum drawdown of 7.3%** under realistic 0.01% commission, using purged time-series cross-validation to eliminate look-ahead bias.
 
-This repository presents a comprehensive research pipeline for developing and validating quantitative trading strategies on low-volatility foreign exchange pairs using hourly OHLCV data. The project demonstrates how advanced feature engineering, machine learning, and rigorous backtesting can be combined to create profitable trading strategies while maintaining strict adherence to no-lookahead principles.
+---
 
-### Key Achievements
-- **+87% returns** with realistic transaction costs (0.01% commission)
-- **Sharpe ratio of 1.69** with maximum drawdown of 7.3%
-- Robust validation using purged time-series cross-validation
-- Comprehensive feature engineering incorporating market microstructure
+## Table of Contents
+- [Key Results](#key-results)
+- [Hypothesis & Data](#hypothesis--data)
+- [Feature Engineering](#feature-engineering)
+- [Model Training](#model-training)
+- [Backtesting Results](#backtesting-results)
+- [How to Run](#how-to-run)
+- [Files](#files)
 
-## 🔬 Research Methodology
+---
 
-### 1. Feature Engineering Strategy
+## Key Results
 
-The project employs a multi-layered approach to feature creation, combining domain knowledge with data-driven insights:
+| Metric | Value |
+|--------|-------|
+| Total Return | **+87%** (with 0.01% commission) |
+| Sharpe Ratio | **1.69** |
+| Maximum Drawdown | **7.3%** |
+| Backtest Period | 2019–2025 (6 years, hourly data) |
+| Validation | 5-fold purged time-series CV (no look-ahead) |
+| Cross-validation | Randomised search, 30 trials |
 
-#### **Temporal & Session Features**
-- **Trading Session Labeling**: Asian, European, and American sessions with overlap periods
-- **Cyclical Encoding**: Sine/cosine transformations for hours, days, months to preserve circular relationships
-- **Seasonal Indicators**: Quarter, month-end, and day-of-week effects
+---
 
-#### **Macroeconomic Integration**  
-- **Interest Rate Differentials**: US 10Y-2Y Treasury spread as currency strength indicator
-- **Commodity Integration**: Daily gold and WTI crude oil prices merged to hourly frequency
-- **Volume Analysis**: Oil trading volume as market activity proxy
+## Hypothesis & Data
 
-#### **Technical Indicators Suite**
-The project implements bounded technical indicators across three categories:
+<img src="images/report_p1.png" width="650" alt="Hypothesis and Data Overview"/>
 
-**Trend Indicators:**
-- Average Directional Index (ADX) - multiple timeframes (2, 5, 14 periods)
-- Commodity Channel Index (CCI) - various lookback periods (2, 8, 20 periods)
+**Hypothesis:** Time-based patterns and macroeconomic factors drive price changes in low-volatility major FX pairs more than raw price momentum alone.
 
-**Momentum Indicators:**
-- Percentage Price Oscillator (PPO) - fast/slow combinations
-- Chande Momentum Oscillator (CMO) - short and long-term versions
+- **Data:** Hourly OHLCV for a low-volatility major FX pair (6 years, 2019–2025)
+- **Supplementary data:** U.S. Treasury yield spread (10Y–2Y), daily WTI crude oil, daily gold prices
+- **Volume:** Hundreds to low thousands per bar — confirming low-liquidity, low-noise regime
 
-**Volatility Indicators:**
-- Chaikin Volatility - intrabar range analysis
-- Keltner Channel Width - interbar volatility measurement
+The muted raw volatility made vanilla momentum strategies ineffective — requiring session-aware, macro-augmented feature engineering.
 
-#### **Derived Features**
-- **Cross-timeframe differences**: Capturing momentum shifts
-- **Ratio analysis**: Relative strength between different periods
-- **Autocorrelation-guided selection**: Using ACF/PACF analysis for optimal lookback periods
+---
 
-### 2. Innovative Target Signal Creation
+## Feature Engineering
 
-Rather than using traditional price-based targets, this project implements a **hindsight-adjusted signal approach**:
+<img src="images/acf_pacf.png" width="700" alt="ACF/PACF Analysis of Key Features"/>
 
-1. **Base Strategy Generation**: Rule-based EMA/SMA crossover system with take-profit/stop-loss
-2. **Trade Labeling**: Each completed trade classified as Profit (>0.1%), Loss (<-0.1%), or Neutral
-3. **Signal Adjustment**: 
-   - Profitable trades: Keep original signal
-   - Loss-making trades: Reverse the signal
-   - Neutral trades: Set signal to 0 (no position)
+### 3 Feature Categories
 
-This approach enables the ML model to learn from "ideal" hindsight decisions while maintaining realistic market conditions.
+#### 1. Temporal & Session Features
+- **Trading session labels:** Asian-only, European-only, American-only, London+NY overlap
+- **Cyclical encoding:** sine/cosine of hour-of-day, day-of-week, month (preserves circular structure)
+- **Seasonal indicators:** quarter, month-end, day-of-month flags
 
-### 3. Robust Model Development
+#### 2. Macroeconomic Integration
+- **US 10Y–2Y Treasury spread** → (10yr − 2yr)/24 scaled to hourly frequency (USD strength proxy)
+- **WTI crude oil daily close** → merged to hourly via date join
+- **Gold daily close** → merged to hourly; oil trading volume as market activity proxy
 
-#### **Feature Selection Process**
-- **Random Forest Importance**: Permutation-based feature ranking across time-series CV folds
-- **Domain Knowledge Filtering**: Retention of economically meaningful indicators
-- **Correlation Analysis**: Removal of redundant features to prevent overfitting
+#### 3. Technical Indicators (bounded, no lookahead)
 
-#### **XGBoost Implementation**
-- **Hyperparameter Optimization**: 30-iteration randomized search with time-series CV
-- **Class Balancing**: Weighted training to handle imbalanced signal classes
-- **Purged Cross-Validation**: 5-fold time-series CV with gap periods to prevent leakage
-- **Early Stopping**: Prevents overfitting with 150-round patience
+| Category | Indicators |
+|----------|-----------|
+| Trend | ADX (2, 5, 14 periods), CCI (2, 8, 20 periods) |
+| Momentum | RSI variants, Chaikin Volume oscillator |
+| Volatility | Keltner Channel width (multiple lookbacks), ATR |
+| Composite | CCI diff (8−2), Keltner width diff, CCI ratio (2/20), width ratio |
 
-### 4. Realistic Backtesting Framework
+ACF/PACF analysis confirmed serial autocorrelation in key features — validating their predictive relevance.
 
-#### **Execution Assumptions**
-- **Trade Timing**: Execution at bar close prices
-- **Commission Structure**: Realistic FX broker fees (0.003-0.007% per side)
-- **No Slippage**: Conservative assumption for liquid FX pairs
-- **Position Management**: Exclusive long/short positions (no hedging)
+---
 
-#### **Performance Validation**
-- **Out-of-sample testing**: 30% holdout period with no parameter adjustment
-- **Transaction Cost Sensitivity**: Analysis across multiple commission scenarios
-- **Risk Metrics**: Sharpe ratio, Sortino ratio, maximum drawdown analysis
+## Model Training
 
-## 📊 Key Results
+<img src="images/report_p4.png" width="650" alt="XGBoost Training and CV Methodology"/>
 
-### Performance Metrics (0.01% Commission)
-- **Total Return**: +87%
-- **Sharpe Ratio**: 1.69
-- **Maximum Drawdown**: 7.3%
-- **Win Rate**: Competitive risk-adjusted returns
-- **Calmar Ratio**: Strong risk-adjusted performance
+### XGBoost Multi-class Classifier
 
-### Feature Importance Rankings
-Top contributing features identified through permutation importance:
-1. **Original Signal**: Base strategy signal
-2. **CMO_14**: 14-period Chande Momentum Oscillator  
-3. **ADX_5**: 5-period Average Directional Index
-4. **PPO_2_6**: 2/6-period Percentage Price Oscillator
-5. **CCI_ratio_2_20**: Cross-timeframe CCI ratio
+**Critical design choices:**
+1. **Purged Time-Series CV** — 5-fold with 5-bar gap between train and validation to prevent leakage; chronological ordering maintained strictly
+2. **Randomised Hyperparameter Search** — 30 trials over learning rate (η), max depth, subsampling, regularisation
+3. **Early stopping** — 150 rounds to select optimal iteration
+4. **Hindsight-adjusted target** — signal labels corrected for known past mistakes
 
-## 🚀 Getting Started
+```python
+from xgboost import XGBClassifier
+from sklearn.model_selection import TimeSeriesSplit
 
-### Prerequisites
-- Python 3.9+
-- Jupyter Lab/Notebook environment
-- Minimum 8GB RAM for full dataset processing
+tscv = TimeSeriesSplit(n_splits=5, gap=5)  # 5-bar gap prevents lookahead
+model = XGBClassifier(
+    learning_rate=eta,
+    max_depth=depth,
+    subsample=subsample,
+    n_estimators=1000,
+    early_stopping_rounds=150
+)
+```
 
-### Data Requirements
-Ensure the `data/` directory contains:
-- `data.csv`: Hourly OHLCV forex data
-- `gold.csv`: Daily gold close prices
-- `oil.csv`: Daily WTI crude oil data with volume
-- `interest_rates.csv`: US Treasury yield curve data
+---
 
-## 🔧 Configuration Options
+## Backtesting Results
 
-### Strategy Parameters
-#### Base strategy settings
-- EMA_WIN = 500    # EMA lookback period
-- SMA_WIN = 2000   # SMA lookback period
-- TP_PCT = 0.005   # Take profit threshold (0.5%)
-- MAX_HOLD = 240   # Maximum position holding period
+<img src="images/equity_curve.png" width="700" alt="Equity Curve 2019–2025"/>
 
-#### Model settings
-- N_ITER = 30      # Hyperparameter search iterations
-- N_SPLITS = 5     # Time-series CV folds
-- GAP_BARS = 5     # Purge gap between train/validation
+Portfolio grows from $100,000 to ~$187,000 (2019–2025), with a steady upward trajectory. No single catastrophic drawdown event — consistent compounding across all 3 major macro regimes (COVID volatility spike 2020, rate hike cycle 2022–2023, normalisation 2024–2025).
 
-  
-## 🔮 Future Enhancements
+<img src="images/rolling_volatility.png" width="700" alt="Rolling Annualised Volatility"/>
 
-### Model Improvements
-- **Ensemble Methods**: Combine multiple model types (XGBoost, LSTM, Random Forest)
-- **Alternative Targets**: Explore different labeling schemes and prediction horizons
-- **Feature Engineering**: Add order book imbalance, news sentiment, and volatility surfaces
+Rolling 126-bar annualised volatility peaked during the 2022–2023 rate hike cycle (~22%) but remained well-managed throughout via the adaptive position framework.
 
-### Execution Optimization
-- **Market Microstructure**: Incorporate bid-ask spreads and order book dynamics
-- **Optimal Execution**: Implement VWAP, TWAP, and other execution algorithms
-- **Multi-Asset**: Extend to currency baskets and cross-asset signals
+### Performance Breakdown
 
-### Risk Management
-- **Dynamic Position Sizing**: Kelly criterion and risk parity approaches
-- **Regime Detection**: Adapt strategy parameters to market conditions
-- **Stress Testing**: Monte Carlo simulation and scenario analysis
+| Period | Characteristic | Strategy Behaviour |
+|--------|---------------|-------------------|
+| 2019–2020 | Low volatility, COVID spike | Steady accumulation; navigated March 2020 drawdown |
+| 2021–2022 | Rate uncertainty, USD strengthening | Macroeconomic features gave edge on USD pairs |
+| 2023–2024 | Normalisation, range markets | Session-based features exploited intraday patterns |
+| 2024–2025 | Continued trend | Consistent compounding to $187K |
 
+---
 
+## How to Run
+
+```bash
+git clone https://github.com/aguru-venkata-saisantosh-patnaik/Forex-Quantitative-Trading-Strategy-Development.git
+cd Forex-Quantitative-Trading-Strategy-Development
+pip install -r requirements.txt
+```
+
+Open `full_developed_strategy.ipynb` in Jupyter and run all cells. The notebook handles:
+1. Data loading (`data.csv`, `gold.csv`, `oil.csv`)
+2. Feature engineering (all 3 categories)
+3. Target labelling and purged CV split
+4. XGBoost training with hyperparameter search
+5. Backtesting with commission and equity curve generation
+
+---
+
+## Files
+
+| File | Description |
+|------|------------|
+| [`full_developed_strategy.ipynb`](full_developed_strategy.ipynb) | Complete pipeline: feature engineering → model → backtest |
+| [`data.csv`](data.csv) | Hourly FX OHLCV data |
+| [`gold.csv`](gold.csv) | Daily gold prices |
+| [`oil.csv`](oil.csv) | Daily WTI crude oil prices |
+| [`report.pdf`](report.pdf) | Full research report with methodology and results |
+| [`requirements.txt`](requirements.txt) | Python dependencies |
+
+---
+
+## Contact
+
+[agurusantosh@gmail.com](mailto:agurusantosh@gmail.com)
