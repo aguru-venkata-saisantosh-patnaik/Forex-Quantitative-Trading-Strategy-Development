@@ -33,8 +33,6 @@ An end-to-end quantitative research pipeline — from raw hourly FX data to a li
 
 ## Hypothesis & Data
 
-<img src="images/report_p1.png" width="650" alt="Hypothesis and Data Overview"/>
-
 **Hypothesis:** Time-based patterns and macroeconomic factors drive price changes in low-volatility major FX pairs more than raw price momentum alone.
 
 - **Data:** Hourly OHLCV for a low-volatility major FX pair (6 years, 2019–2025)
@@ -75,8 +73,6 @@ ACF/PACF analysis confirmed serial autocorrelation in key features — validatin
 ---
 
 ## Model Training
-
-<img src="images/report_p4.png" width="650" alt="XGBoost Training and CV Methodology"/>
 
 ### XGBoost Multi-class Classifier
 
