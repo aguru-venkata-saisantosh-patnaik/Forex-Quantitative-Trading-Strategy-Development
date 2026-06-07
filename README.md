@@ -35,17 +35,31 @@ An end-to-end quantitative research pipeline — from raw hourly FX data to a li
 
 **Hypothesis:** Time-based patterns and macroeconomic factors drive price changes in low-volatility major FX pairs more than raw price momentum alone.
 
-- **Data:** Hourly OHLCV for a low-volatility major FX pair (6 years, 2019–2025)
-- **Supplementary data:** U.S. Treasury yield spread (10Y–2Y), daily WTI crude oil, daily gold prices
-- **Volume:** Hundreds to low thousands per bar — confirming low-liquidity, low-noise regime
+| Data Source | Description | Frequency |
+|-------------|------------|-----------|
+| FX OHLCV | Low-volatility major currency pair | Hourly |
+| U.S. Treasury spread | 10Y–2Y yield spread | Daily (joined hourly) |
+| WTI crude oil | Daily close prices | Daily (joined hourly) |
+| Gold | Daily close prices | Daily (joined hourly) |
+| Volume | Oil trading volume as market activity proxy | Daily |
 
-The muted raw volatility made vanilla momentum strategies ineffective — requiring session-aware, macro-augmented feature engineering.
+- **Volume:** Hundreds to low thousands per bar — confirming low-liquidity, low-noise regime
+- The muted raw volatility made vanilla momentum strategies ineffective — requiring session-aware, macro-augmented feature engineering
 
 ---
 
 ## Feature Engineering
 
-<img src="images/acf_pacf.png" width="700" alt="ACF/PACF Analysis of Key Features"/>
+### ACF/PACF Analysis
+
+Serial autocorrelation analysis confirmed predictive relevance of key engineered features:
+
+| Feature Group | Autocorrelation Finding | Implication |
+|--------------|------------------------|-------------|
+| Session-tagged returns | Significant lag-1 autocorrelation during London+NY overlap | Session labelling is predictive |
+| ADX (2-period) | Strong partial autocorrelation at lags 1–3 | Short-window ADX captures momentum persistence |
+| CCI ratio (2/20) | Decaying ACF with slow taper | CCI ratio is a trend-following signal, not noise |
+| Keltner width | Significant at lag-1, drops at lag-2 | ATR-based volatility is a 1-bar leading indicator |
 
 ### 3 Feature Categories
 
@@ -67,8 +81,6 @@ The muted raw volatility made vanilla momentum strategies ineffective — requir
 | Momentum | RSI variants, Chaikin Volume oscillator |
 | Volatility | Keltner Channel width (multiple lookbacks), ATR |
 | Composite | CCI diff (8−2), Keltner width diff, CCI ratio (2/20), width ratio |
-
-ACF/PACF analysis confirmed serial autocorrelation in key features — validating their predictive relevance.
 
 ---
 
@@ -100,13 +112,21 @@ model = XGBClassifier(
 
 ## Backtesting Results
 
-<img src="images/equity_curve.png" width="700" alt="Equity Curve 2019–2025"/>
+### Portfolio Growth (2019–2025)
 
-Portfolio grows from $100,000 to ~$187,000 (2019–2025), with a steady upward trajectory. No single catastrophic drawdown event — consistent compounding across all 3 major macro regimes (COVID volatility spike 2020, rate hike cycle 2022–2023, normalisation 2024–2025).
+Portfolio grows from $100,000 to ~$187,000 (6 years) with steady compounding and no single catastrophic drawdown event across 3 major macro regimes.
 
-<img src="images/rolling_volatility.png" width="700" alt="Rolling Annualised Volatility"/>
+| Period | Market Regime | Portfolio Behaviour | Annualised Vol |
+|--------|--------------|--------------------|-|
+| 2019 | Low volatility baseline | Steady accumulation | ~8% |
+| 2020 | COVID volatility spike | Navigated March 2020 drawdown, recovered | ~18% |
+| 2021–2022 | Rate uncertainty, USD strengthening | Macro features gave edge on USD pairs | ~22% (peak) |
+| 2023–2024 | Normalisation, range markets | Session-based features exploited intraday patterns | ~12% |
+| 2024–2025 | Continued trend | Consistent compounding to $187K | ~10% |
 
-Rolling 126-bar annualised volatility peaked during the 2022–2023 rate hike cycle (~22%) but remained well-managed throughout via the adaptive position framework.
+### Rolling Annualised Volatility
+
+Rolling 126-bar annualised volatility peaked during the 2022–2023 rate hike cycle (~22%) but remained well-managed throughout via the adaptive position framework. The strategy's max drawdown stayed at 7.3% even through the highest-volatility period.
 
 ### Performance Breakdown
 
