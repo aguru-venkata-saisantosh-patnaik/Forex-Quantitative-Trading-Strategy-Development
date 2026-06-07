@@ -50,9 +50,9 @@ An end-to-end quantitative research pipeline — from raw hourly FX data to a li
 
 ## Feature Engineering
 
-### ACF/PACF Analysis
+<img src="images/acf_pacf.png" width="700" alt="ACF/PACF Analysis of Key Features"/>
 
-Serial autocorrelation analysis confirmed predictive relevance of key engineered features:
+ACF/PACF analysis confirmed serial autocorrelation in key engineered features — validating their predictive relevance.
 
 | Feature Group | Autocorrelation Finding | Implication |
 |--------------|------------------------|-------------|
@@ -112,30 +112,23 @@ model = XGBClassifier(
 
 ## Backtesting Results
 
-### Portfolio Growth (2019–2025)
+<img src="images/equity_curve.png" width="700" alt="Equity Curve 2019–2025"/>
 
-Portfolio grows from $100,000 to ~$187,000 (6 years) with steady compounding and no single catastrophic drawdown event across 3 major macro regimes.
+Portfolio grows from $100,000 to ~$187,000 (2019–2025), with a steady upward trajectory. No single catastrophic drawdown event — consistent compounding across all 3 major macro regimes (COVID volatility spike 2020, rate hike cycle 2022–2023, normalisation 2024–2025).
 
-| Period | Market Regime | Portfolio Behaviour | Annualised Vol |
-|--------|--------------|--------------------|-|
-| 2019 | Low volatility baseline | Steady accumulation | ~8% |
-| 2020 | COVID volatility spike | Navigated March 2020 drawdown, recovered | ~18% |
-| 2021–2022 | Rate uncertainty, USD strengthening | Macro features gave edge on USD pairs | ~22% (peak) |
-| 2023–2024 | Normalisation, range markets | Session-based features exploited intraday patterns | ~12% |
-| 2024–2025 | Continued trend | Consistent compounding to $187K | ~10% |
+<img src="images/rolling_volatility.png" width="700" alt="Rolling Annualised Volatility"/>
 
-### Rolling Annualised Volatility
-
-Rolling 126-bar annualised volatility peaked during the 2022–2023 rate hike cycle (~22%) but remained well-managed throughout via the adaptive position framework. The strategy's max drawdown stayed at 7.3% even through the highest-volatility period.
+Rolling 126-bar annualised volatility peaked during the 2022–2023 rate hike cycle (~22%) but remained well-managed throughout via the adaptive position framework. Max drawdown held at 7.3% even through the highest-volatility period.
 
 ### Performance Breakdown
 
-| Period | Characteristic | Strategy Behaviour |
-|--------|---------------|-------------------|
-| 2019–2020 | Low volatility, COVID spike | Steady accumulation; navigated March 2020 drawdown |
-| 2021–2022 | Rate uncertainty, USD strengthening | Macroeconomic features gave edge on USD pairs |
-| 2023–2024 | Normalisation, range markets | Session-based features exploited intraday patterns |
-| 2024–2025 | Continued trend | Consistent compounding to $187K |
+| Period | Characteristic | Strategy Behaviour | Annualised Vol |
+|--------|---------------|--------------------|----------------|
+| 2019 | Low volatility baseline | Steady accumulation | ~8% |
+| 2020 | COVID spike | Navigated March 2020 drawdown, recovered | ~18% |
+| 2021–2022 | Rate uncertainty, USD strengthening | Macro features gave edge on USD pairs | ~22% (peak) |
+| 2023–2024 | Normalisation, range markets | Session-based features exploited intraday patterns | ~12% |
+| 2024–2025 | Continued trend | Consistent compounding to $187K | ~10% |
 
 ---
 
